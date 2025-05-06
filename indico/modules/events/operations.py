@@ -80,8 +80,18 @@ def delete_event_label(event_label):
 
 @no_autoflush  
 def create_event(category, event_type, data, add_creator_as_manager=True, features=None, cloning=False):
-    """
-	Create a new event with batched DB flushes to reduce round-trips and ensure atomicity.
+    """Create a new event.
+    :param category: The category in which to create the event
+    :param event_type: An `EventType` value
+    :param data: A dict containing data used to populate the event
+    :param add_creator_as_manager: Whether the creator (current user)
+                                   should be added as a manager
+    :param features: A list of features that will be enabled for the
+                     event. If set, only those features will be used
+                     and the default feature set for the event type
+                     will be ignored.
+    :param cloning: Whether the event is created via cloning or not
+	:Create a new event with batched DB flushes to reduce round-trips and ensure atomicity.
 	"""
     from indico.modules.rb.operations.bookings import create_booking_for_event
     event = Event(category=category, type_=event_type)
@@ -90,11 +100,11 @@ def create_event(category, event_type, data, add_creator_as_manager=True, featur
     create_booking = data.pop('create_booking', False)
     person_link_data = data.pop('person_link_data', {})
     if category is None:
+        # don't allow setting a protection mode on unlisted events; we
+        # keep the inheriting default
         data.pop('protection_mode', None)
-
     event.populate_from_dict(data)
     event.person_link_data = person_link_data
-
     if theme is not None:
         layout_settings.set(event, 'timetable_theme', theme)
     if add_creator_as_manager:
@@ -102,9 +112,7 @@ def create_event(category, event_type, data, add_creator_as_manager=True, featur
             event.update_principal(event.creator, full_access=True)
     if features is not None:
         features_event_settings.set(event, 'enabled', features)
-
     db.session.flush()
-
     signals.event.created.send(event, cloning=cloning)
     logger.info('Event %r created in %r by %r', event, category, session.user)
     sep = ' » '
@@ -120,10 +128,9 @@ def create_event(category, event_type, data, add_creator_as_manager=True, featur
             booking = create_booking_for_event(room_id, event)
             if booking:
                 logger.info('Booking %r created for event %r', booking, event)
-                log_data = {
-                	'Room': booking.room.full_name,
-                	'Date': booking.start_dt.strftime('%d/%m/%Y'),
-                	'Times': f"{booking.start_dt.strftime('%H:%M')} - {booking.end_dt.strftime('%H:%M')}"
+                log_data = {'Room': booking.room.full_name,
+                	        'Date': booking.start_dt.strftime('%d/%m/%Y'),
+                	        'Times': f"{booking.start_dt.strftime('%H:%M')} - {booking.end_dt.strftime('%H:%M')}"
             	}
                 event.log(EventLogRealm.event, LogKind.positive, 'Event',
                       	'Room booked for the event', session.user, data=log_data)
