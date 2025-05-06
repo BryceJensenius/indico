@@ -78,9 +78,10 @@ def delete_event_label(event_label):
     logger.info('Event label "%s" deleted by %s', event_label, session.user)
 
 
-@no_autoflush  
+@no_autoflush
 def create_event(category, event_type, data, add_creator_as_manager=True, features=None, cloning=False):
     """Create a new event.
+
     :param category: The category in which to create the event
     :param event_type: An `EventType` value
     :param data: A dict containing data used to populate the event
@@ -91,7 +92,6 @@ def create_event(category, event_type, data, add_creator_as_manager=True, featur
                      and the default feature set for the event type
                      will be ignored.
     :param cloning: Whether the event is created via cloning or not
-	:Create a new event with batched DB flushes to reduce round-trips and ensure atomicity.
 	"""
     from indico.modules.rb.operations.bookings import create_booking_for_event
     event = Event(category=category, type_=event_type)
