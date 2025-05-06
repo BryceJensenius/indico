@@ -114,8 +114,8 @@ def create_event(category, event_type, data, add_creator_as_manager=True, featur
         features_event_settings.set(event, 'enabled', features)
     db.session.flush()
     signals.event.created.send(event, cloning=cloning)
-    logger.info('Event %r created in %r by %r', event, category, session.user)
-    sep = ' » '
+    logger.info('Event %r created in %r by %r ', event, category, session.user)
+    sep = ' \N{RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK} '
     event.log(EventLogRealm.event, LogKind.positive, 'Event', 'Event created', session.user,
               data={'Category': sep.join(category.chain_titles) if category else None})
     if category:
