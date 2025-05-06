@@ -117,7 +117,7 @@ def create_event(category, event_type, data, add_creator_as_manager=True, featur
     logger.info('Event %r created in %r by %r', event, category, session.user)
     sep = ' » '
     event.log(EventLogRealm.event, LogKind.positive, 'Event', 'Event created', session.user,
-                  data={'Category': sep.join(category.chain_titles) if category else None})
+            data={'Category': sep.join(category.chain_titles) if category else None})
     if category:
         category.log(CategoryLogRealm.events, LogKind.positive, 'Content',
                     f'Event created: "{event.title}"', session.user,
