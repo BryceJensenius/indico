@@ -129,11 +129,11 @@ def create_event(category, event_type, data, add_creator_as_manager=True, featur
             if booking:
                 logger.info('Booking %r created for event %r', booking, event)
                 log_data = {'Room': booking.room.full_name,
-                	        'Date': booking.start_dt.strftime('%d/%m/%Y'),
-                	        'Times': f"{booking.start_dt.strftime('%H:%M')} - {booking.end_dt.strftime('%H:%M')}"
-            	}
-                event.log(EventLogRealm.event, LogKind.positive, 'Event',
-                      	'Room booked for the event', session.user, data=log_data)
+                            'Date': booking.start_dt.strftime('%d/%m/%Y'),
+                            'Times': '{} - {}'.format(booking.start_dt.strftime('%H:%M'),
+                                                      booking.end_dt.strftime('%H:%M'))}
+                event.log(EventLogRealm.event, LogKind.positive, 'Event', 'Room booked for the event',
+                          session.user, data=log_data)
                 db.session.flush()
     return event
 
